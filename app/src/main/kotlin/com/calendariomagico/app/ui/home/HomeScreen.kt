@@ -104,7 +104,7 @@ fun HomeScreen(repository: CalendarRepository, onOpenSettings: () -> Unit) {
             MonthGrid(
                 month = state.month,
                 selectedDate = state.selectedDate,
-                itemsByDay = viewModel::itemsOn,
+                itemsByDay = state::itemsOn,
                 onDayClick = viewModel::selectDate,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
