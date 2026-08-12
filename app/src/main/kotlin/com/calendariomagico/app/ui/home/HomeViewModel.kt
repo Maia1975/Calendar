@@ -47,7 +47,7 @@ class HomeViewModel(private val repository: CalendarRepository) : ViewModel() {
             calendarName = group?.name.orEmpty(),
             pinCode = group?.pinCode.orEmpty()
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, HomeUiState())
 
     fun selectDate(date: LocalDate) {
         selectedDate.value = date

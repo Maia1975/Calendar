@@ -54,11 +54,16 @@ class CalendarRepositoryTest {
 
     @Test
     fun `joinCalendar succeeds with a valid pin and adds the member`() = runTest {
-        val owner = buildRepository(this)
+        // Owner and guest are two different devices that must share the same
+        // backend (their common Firestore project) but have their own auth
+        // and on-device profile, same as in real life.
+        val sharedBackend = FakeCalendarBackend()
+        val owner = CalendarRepository(sharedBackend, FakeAuthGateway("uid-owner"), FakeProfileStore(), backgroundScope)
+        val guest = CalendarRepository(sharedBackend, FakeAuthGateway("uid-guest"), FakeProfileStore(), backgroundScope)
+
         val ownerGroup = owner.createCalendar("Família Silva", "Maria").getOrThrow()
         advanceUntilIdle()
 
-        val guest = buildRepository(this)
         val result = guest.joinCalendar(ownerGroup.pinCode, "João")
         advanceUntilIdle()
 

@@ -8,8 +8,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+// manifest = Config.NONE skips Robolectric's manifest-driven app/provider setup
+// (which would otherwise try to auto-init Firebase from the placeholder
+// google-services.json and crash) — DataStore only needs a plain Context.
 @RunWith(RobolectricTestRunner::class)
+@Config(manifest = Config.NONE)
 class DeviceProfileStoreTest {
 
     private fun newStore() = DeviceProfileStore(ApplicationProvider.getApplicationContext())
