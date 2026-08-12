@@ -16,7 +16,7 @@ class PinCodeGeneratorTest {
     fun `generate never includes ambiguous characters`() {
         repeat(200) { seed ->
             val code = PinCodeGenerator.generate(Random(seed))
-            assertThat(code).containsNoneIn(listOf('0', 'O', '1', 'I', 'L'))
+            assertThat(code.toList()).containsNoneIn(listOf('0', 'O', '1', 'I', 'L'))
         }
     }
 
