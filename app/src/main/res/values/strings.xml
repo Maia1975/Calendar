@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Calendário Mágico</string>
+    <string name="notification_channel_name">Lembretes</string>
+    <string name="notification_channel_description">Notificações de tarefas e lembretes do Calendário Mágico</string>
+</resources>
