@@ -85,13 +85,21 @@ class CalendarRepositoryTest {
         repository.createCalendar("Família Silva", "Maria")
         advanceUntilIdle()
 
-        val saveResult = repository.saveItem(
-            CalendarItem(type = ItemType.TAREFA, title = "Arrumar o quarto", dateTimeMillis = 1_000L)
-        )
-        advanceUntilIdle()
+        // Subscribing before mutating (rather than polling .value afterwards)
+        // lets awaitItem() properly suspend for the next emission, which is
+        // what actually drives the test scheduler to run the background
+        // collector that updates `items`.
+        repository.items.test {
+            assertThat(awaitItem()).isEmpty()
 
-        assertThat(saveResult.isSuccess).isTrue()
-        assertThat(repository.items.value.map { it.title }).contains("Arrumar o quarto")
+            val saveResult = repository.saveItem(
+                CalendarItem(type = ItemType.TAREFA, title = "Arrumar o quarto", dateTimeMillis = 1_000L)
+            )
+            assertThat(saveResult.isSuccess).isTrue()
+
+            assertThat(awaitItem().map { it.title }).contains("Arrumar o quarto")
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -104,10 +112,14 @@ class CalendarRepositoryTest {
         ).getOrThrow()
         advanceUntilIdle()
 
-        repository.toggleDone(saved)
-        advanceUntilIdle()
+        repository.items.test {
+            assertThat(awaitItem().first { it.id == saved.id }.isDone).isFalse()
 
-        assertThat(repository.items.value.first { it.id == saved.id }.isDone).isTrue()
+            repository.toggleDone(saved)
+
+            assertThat(awaitItem().first { it.id == saved.id }.isDone).isTrue()
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -120,10 +132,14 @@ class CalendarRepositoryTest {
         ).getOrThrow()
         advanceUntilIdle()
 
-        repository.deleteItem(saved.id)
-        advanceUntilIdle()
+        repository.items.test {
+            assertThat(awaitItem().any { it.id == saved.id }).isTrue()
 
-        assertThat(repository.items.value.any { it.id == saved.id }).isFalse()
+            repository.deleteItem(saved.id)
+
+            assertThat(awaitItem().any { it.id == saved.id }).isFalse()
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
