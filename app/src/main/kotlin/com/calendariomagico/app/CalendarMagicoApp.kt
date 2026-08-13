@@ -8,7 +8,6 @@ import com.calendariomagico.app.data.repository.CalendarRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 
 class CalendarMagicoApp : Application() {
 
@@ -25,6 +24,5 @@ class CalendarMagicoApp : Application() {
             profileStore = DeviceProfileStore(this),
             externalScope = appScope
         )
-        appScope.launch { repository.start() }
     }
 }

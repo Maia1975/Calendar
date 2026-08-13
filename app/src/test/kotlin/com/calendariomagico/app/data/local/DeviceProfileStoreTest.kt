@@ -1,5 +1,6 @@
 package com.calendariomagico.app.data.local
 
+import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.calendariomagico.app.data.model.CalendarGroup
 import com.google.common.truth.Truth.assertThat
@@ -10,11 +11,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// manifest = Config.NONE skips Robolectric's manifest-driven app/provider setup
-// (which would otherwise try to auto-init Firebase from the placeholder
-// google-services.json and crash) — DataStore only needs a plain Context.
+// Robolectric normally instantiates the app's real CalendarMagicoApp, whose
+// onCreate() eagerly builds a Firestore client — that needs a real Firebase
+// project and crashes here against the placeholder google-services.json.
+// DeviceProfileStore only needs a plain Context, so run against a bare
+// android.app.Application instead of the real one.
 @RunWith(RobolectricTestRunner::class)
-@Config(manifest = Config.NONE)
+@Config(application = Application::class)
 class DeviceProfileStoreTest {
 
     private fun newStore() = DeviceProfileStore(ApplicationProvider.getApplicationContext())
