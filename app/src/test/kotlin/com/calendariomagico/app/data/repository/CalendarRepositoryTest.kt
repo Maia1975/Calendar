@@ -107,16 +107,19 @@ class CalendarRepositoryTest {
         val repository = buildRepository(this)
         repository.createCalendar("Família Silva", "Maria")
         advanceUntilIdle()
-        val saved = repository.saveItem(
-            CalendarItem(type = ItemType.TAREFA, title = "Lição de casa", dateTimeMillis = 1_000L)
-        ).getOrThrow()
-        advanceUntilIdle()
 
+        // Every mutation happens while the turbine subscription is already
+        // active: only then does each awaitItem() reliably observe the
+        // emission that follows it (see saveItem test above for why).
         repository.items.test {
+            assertThat(awaitItem()).isEmpty()
+
+            val saved = repository.saveItem(
+                CalendarItem(type = ItemType.TAREFA, title = "Lição de casa", dateTimeMillis = 1_000L)
+            ).getOrThrow()
             assertThat(awaitItem().first { it.id == saved.id }.isDone).isFalse()
 
             repository.toggleDone(saved)
-
             assertThat(awaitItem().first { it.id == saved.id }.isDone).isTrue()
             cancelAndIgnoreRemainingEvents()
         }
@@ -127,16 +130,16 @@ class CalendarRepositoryTest {
         val repository = buildRepository(this)
         repository.createCalendar("Família Silva", "Maria")
         advanceUntilIdle()
-        val saved = repository.saveItem(
-            CalendarItem(title = "Aniversário", dateTimeMillis = 1_000L)
-        ).getOrThrow()
-        advanceUntilIdle()
 
         repository.items.test {
+            assertThat(awaitItem()).isEmpty()
+
+            val saved = repository.saveItem(
+                CalendarItem(title = "Aniversário", dateTimeMillis = 1_000L)
+            ).getOrThrow()
             assertThat(awaitItem().any { it.id == saved.id }).isTrue()
 
             repository.deleteItem(saved.id)
-
             assertThat(awaitItem().any { it.id == saved.id }).isFalse()
             cancelAndIgnoreRemainingEvents()
         }
